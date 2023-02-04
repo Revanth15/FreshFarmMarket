@@ -1,0 +1,132 @@
+﻿@page
+@model FreshFarmMarket.Pages.RegisterModel
+@{
+}
+
+<form method="post" enctype="multipart/form-data">
+	<div class="container mt-5">
+
+		<div class="row justify-content-center align-items-center">
+
+			<div class="col-sm-12 col-md-12 col-lg-12">
+				<h1 class="mb-3">Register </h1>
+
+				<div asp-validation-summary="All" class="text-danger"></div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="fullName">Full Name</label>
+					<input type="Text" asp-for="fullName" class="form-control" required/>
+					<span asp-validaton-for="fullName" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="email">Email Address</label>
+					<input type="Text" asp-for="email" class="form-control" required/>
+					<span asp-validaton-for="email" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="mobileNo">Mobile Number</label>
+					<input type="number" asp-for="mobileNo" class="form-control" required/>
+					<span asp-validaton-for="mobileNo" class="text-danger"></span>
+				</div>
+
+				<div class="row mb-3">
+					<label class="class="col-sm-2 col-form-label" asp-for="gender">Gender </label>
+					<div class="col-sm-10 d-flex align-items-center">
+						<div class="form-check form-check-inline">
+							@Html.RadioButtonFor(m => m.gender, "M", new {@class = "form-check-input"})
+							<label class="form-check-label">Male</label>
+						</div>
+						<div class="form-check form-check-inline">
+							@Html.RadioButtonFor(m => m.gender, "F", new {@class = "form-check-input"})
+							<label class="form-check-label">Female</label>
+						</div>
+					</div>
+					<span asp-validaton-for="gender" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="creditCardNo">Credit Card Number</label>
+					<input type="number" maxlength="16" required oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" asp-for="creditCardNo" class="form-control" />
+					<span asp-validaton-for="creditCardNo" class="text-danger"></span>
+				</div>
+				<div class="mb-3">
+					<label class="form-label" asp-for="deliveryAddress">Delivery Address</label>
+					<input type="Text" asp-for="deliveryAddress" class="form-control" required />
+					<span asp-validaton-for="deliveryAddress" class="text-danger"></span>
+				</div>
+				<div class="mb-3">
+					<label class="form-label" asp-for="aboutMe">About Me</label>
+					<textarea type="Text" asp-for="aboutMe" class="form-control" required></textarea>
+					<span asp-validaton-for="aboutMe" class="text-danger"></span>
+				</div>
+
+				<p id="passval" style="color:red;">Password does not meet requirements!</p>
+				<p id="passval2" style="color:red; display:none;">Passwords do not match!</p>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="password">Password</label>
+					<input id="pass" type="password" asp-for="password" class="form-control" required/>
+					<span asp-validaton-for="password" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="confirmPassword">Confirm Password</label>
+					<input id="pass2" type="password" asp-for="confirmPassword" class="form-control" required/>
+					<span asp-validaton-for="confirmPassword" class="text-danger"></span>
+				</div>
+
+				<div class="col-md-4">
+					<div class="mb-3">
+						<input type="file" accept="image/*" class="form-control" asp-for="Upload" onchange="showImgPreview(this)" required/>
+						<span asp-validation-for="Upload" class="text-danger"></span>
+					</div>
+						<img id="imgPreview" class="rounded-circle" style="height:300px;width:300px;object-fit:cover" src="/uploads/user.png" />
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary">Register</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+@section Scripts
+{
+	<script>
+	
+		function showImgPreview(input) {
+			if (input.files[0]) {
+				var uploadimg = new FileReader();
+				uploadimg.onload = function(displayimg) {
+					$("#imgPreview").attr('src', displayimg.target.result);
+				}
+				uploadimg.readAsDataURL(input.files[0]);
+			}
+		}
+
+		$("#pass").on("input", function() {
+		  var bool = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{12,}$/.test($("#pass").val())
+		  if(bool == true){
+			  $("#passval").text("Password meets requirement!")
+			  $("#passval").css("color", "green")
+		  }else {
+			  $("#passval").text("Password does not meet requirements!")
+			  $("#passval").css("color", "red")
+		  }
+
+		  
+
+		});
+
+		$("#pass2").on("input", function() {
+			if($("#pass").val() == $("#pass2").val()){
+				  $("#passval2").css("display", "none")
+			}else {
+				$("#passval2").css("display", "")
+			}
+		});
+	</script>
+}

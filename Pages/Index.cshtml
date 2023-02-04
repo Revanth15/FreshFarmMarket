@@ -3,8 +3,71 @@
 @{
     ViewData["Title"] = "Home page";
 }
+<div class="row">
+    <div class="col-lg-8">
+        <div class="row gx-3">
+            <div class="col-6 mb-3">
+                <label class="form-label">Full Name:</label>
+                <p>@Model.fullName</p>
+            </div>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+            <div class="col-6 mb-3">
+                <label class="form-label">Credit Card Number:</label>
+                <p>@Model.creditCardNo</p>
+            </div>
+
+            <div class="col-6 mb-3">
+                <label class="form-label">Gender:</label>
+                
+                    @{ if(@Model.gender == "M"){
+                                            <p>Male</p>
+                        }else
+                        {
+                                            <p>Female</p>
+                        }
+                    }
+                    </div>
+
+            <div class="col-6 mb-3">
+                <label class="form-label">Email:</label>
+                <p>@Model.email</p>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Password Hash:</label>
+                <p>@Model.password</p>
+            </div>
+
+            <div class="col-6 mb-3">
+                <label class="form-label">Mobile Number:</label>
+                <p>@Model.mobileNo</p>
+            </div>
+
+            <div class="col-6 mb-3">
+                <label class="form-label">Delivery Address:</label>
+                <p>@Model.deliveryAddress</p>
+            </div>
+
+            <div class="col-6 mb-3">
+                <label class="form-label">About me:</label>
+                <p>@Model.aboutMe</p>
+            </div>
+        </div>
+    </div>
+    
+    <aside class="col-lg-4">
+        <label class="form-label">Uploaded Image:</label>
+        <figure class="text-lg-center">
+            <img id="imgPreview" class="img-lg mb-3 img-avatar" src="@Model.ImageURL" width="256px" height="256px" alt="User Photo" />
+        </figure>
+    </aside>
 </div>
+
+<style>
+    p{
+        background-color:#D3D3D3;
+        padding:15px;
+        border-radius:10px;
+    }
+    
+</style>
