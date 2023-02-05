@@ -23,7 +23,6 @@ namespace FreshFarmMarket.Pages
             _emailSender = emailSender;
             _userManager = userManager;
             _logger = logger;
-
         }
 
         [BindProperty]
@@ -48,6 +47,24 @@ namespace FreshFarmMarket.Pages
             {
                 return Page();
             }
+
+            var lastPassApprove = true;
+
+            if (user.lastPasswordChangeDate.AddMinutes(2) > DateTime.Now)
+            {
+                TempData["FlashMessage.Text"] = "Password Age! Password cannot be change within 2 Minutes";
+                TempData["FlashMessage.Type"] = "danger";
+                lastPassApprove = false;
+            }
+
+
+            if (!lastPassApprove)
+            {
+                TempData["FlashMessage.Text"] = "Password Age! Password cannot be change within 2 Minutes";
+                TempData["FlashMessage.Type"] = "danger";
+                return Redirect("/changepassword");
+            }
+
 
             var specialCode = await _userManager.GeneratePasswordResetTokenAsync(user);
             specialCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(specialCode));

@@ -17,5 +17,6 @@ namespace FreshFarmMarket.Models
         }
 
         public DbSet<AuditLog> AuditLog { get; set; }
+        public DbSet<PreviousPasswords> PreviousPasswords { get; set; }
     }
 }

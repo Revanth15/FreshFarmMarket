@@ -10,7 +10,7 @@ namespace FreshFarmMarket.Models
         [Required]
         public string passwordHash { get; set; }
 
-        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
     }
 }

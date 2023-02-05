@@ -16,14 +16,15 @@ namespace FreshFarmMarket.Pages
         private SignInManager<ApplicationUser> signInManager { get; }
         private readonly AuditLogService _auditlogService;
         private IWebHostEnvironment _environment;
+        private readonly PreviousPasswordsService _previousPasswordsService;
 
-
-        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment environment, AuditLogService auditlogService)
+        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment environment, AuditLogService auditlogService, PreviousPasswordsService previousPasswordsService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             _environment = environment;
             _auditlogService = auditlogService;
+            _previousPasswordsService = previousPasswordsService;
         }
 
         [BindProperty]
@@ -82,7 +83,7 @@ namespace FreshFarmMarket.Pages
                 }
                 else
                 {
-                    TempData["FlashMessage.Type"] = "error";
+                    TempData["FlashMessage.Type"] = "danger";
                     TempData["FlashMessage.Text"] = "Input required";
                 }
 
@@ -106,9 +107,14 @@ namespace FreshFarmMarket.Pages
                     mobileNo = mobileNo,
                     deliveryAddress = HttpUtility.HtmlEncode(deliveryAddress),
                     imageURL = newUser.imageUrl,
-                    aboutMe = HttpUtility.HtmlEncode(aboutMe)
+                    aboutMe = HttpUtility.HtmlEncode(aboutMe),
+                    lastPasswordChangeDate = DateTime.Now,
                 };
                 var result = await userManager.CreateAsync(user, newUser.password);
+                PreviousPasswords hash = new();
+                hash.userId = user.Id;
+                hash.passwordHash = user.PasswordHash;
+                _previousPasswordsService.AddHash(hash);
                 if (result.Succeeded)
                 {
                     

@@ -13,5 +13,6 @@ namespace FreshFarmMarket.Models
 		public string deliveryAddress { get; set; }
 		public string imageURL { get; set; }
 		public string aboutMe { get; set; }
+		public DateTime lastPasswordChangeDate { get; set; }
 	}
 }

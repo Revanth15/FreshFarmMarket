@@ -20,11 +20,13 @@ namespace FreshFarmMarket.Pages
         private readonly reCaptchaService _reCaptchaService;
 
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly AuditLogService _auditlogService;
         public readonly IEmailService _emailSender;
-        public LoginModel(SignInManager<ApplicationUser> signInManager, reCaptchaService reCaptchaService, ILogger<IndexModel> logger, AuditLogService auditlogService, IEmailService emailSender)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, reCaptchaService reCaptchaService, ILogger<IndexModel> logger, AuditLogService auditlogService, IEmailService emailSender, UserManager<ApplicationUser> userManager)
         {
             this.signInManager = signInManager;
+            this.userManager = userManager;
             _reCaptchaService = reCaptchaService;
             _emailSender = emailSender;
             _logger = logger;
@@ -56,10 +58,19 @@ namespace FreshFarmMarket.Pages
                     message = "You are not a human!";
                     return Page();
                 }
+                var user = await userManager.FindByNameAsync(LModel.Email);
+
                 var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
                 LModel.RememberMe, lockoutOnFailure: true);
                 if (identityResult.Succeeded)
                 {
+                    if (user.lastPasswordChangeDate.AddMinutes(30) < DateTime.Now)
+                    {
+                        _logger.LogWarning("failed");
+                        return Redirect("/changepassword");
+                    }
+                    _logger.LogWarning(user.lastPasswordChangeDate.AddMinutes(30).ToString());
+                    _logger.LogWarning(DateTime.Now.ToString());
                     //_logger.LogWarning(HttpContext.Connection.RemoteIpAddress.ToString());
                     _logger.LogWarning(browser);
                     AuditLog log = new();

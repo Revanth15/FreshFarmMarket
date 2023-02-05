@@ -15,6 +15,7 @@ builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>().AddDefaultTokenProviders();
 builder.Services.AddTransient<reCaptchaService>();
 builder.Services.AddScoped<AuditLogService>();
+builder.Services.AddScoped<PreviousPasswordsService>();
 builder.Services.AddAntiforgery(options => options.HeaderName = "XSRF-TOKEN");
 builder.Services.ConfigureApplicationCookie(Config =>
 {
