@@ -3,21 +3,42 @@ using Microsoft.EntityFrameworkCore;
 using FreshFarmMarket.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using FreshFarmMarket.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Antiforgery;
+using FreshFarmMarket.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AuthDbContext>();
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>().AddDefaultTokenProviders();
 builder.Services.AddTransient<reCaptchaService>();
 builder.Services.AddScoped<AuditLogService>();
+builder.Services.AddAntiforgery(options => options.HeaderName = "XSRF-TOKEN");
 builder.Services.ConfigureApplicationCookie(Config =>
 {
     Config.LoginPath = "/Login";
     Config.LogoutPath = "/Logout";
-    Config.ExpireTimeSpan = TimeSpan.FromSeconds(60);
+    Config.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     Config.SlidingExpiration = true;
+});
+
+builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
+{
+    options.Cookie.Name = "MyCookieAuth";
+});
+
+var emailConfig = builder.Configuration
+        .GetSection("EmailConfiguration")
+        .Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
 //builder.Services.AddDistributedMemoryCache();
@@ -58,7 +79,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithRedirects("/errors/{0}");
+app.UseStatusCodePagesWithRedirects("/error/{0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -69,6 +90,23 @@ app.UseAuthentication();
 //app.UseSession();
 
 app.UseAuthorization();
+
+var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
+
+app.Use((context, next) =>
+{
+    var requestPath = context.Request.Path.Value;
+
+    if (string.Equals(requestPath, "/", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(requestPath, "/index.html", StringComparison.OrdinalIgnoreCase))
+    {
+        var tokenSet = antiforgery.GetAndStoreTokens(context);
+        context.Response.Cookies.Append("XSRF-TOKEN", tokenSet.RequestToken!,
+            new CookieOptions { HttpOnly = false });
+    }
+
+    return next(context);
+});
 
 app.MapRazorPages();
 

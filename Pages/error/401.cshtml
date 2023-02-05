@@ -1,0 +1,77 @@
+﻿@page
+@model FreshFarmMarket.Pages.error._401Model
+@{
+}
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<h1>401 Error</h1>
+
+<div class='containerr'>
+  <div class='col'>
+    <h4>Oops, something went wrong.</h4>
+    <h5>Invalid credentials.</h5>
+    <p>Click here to <a href="/login">signin</a></p>
+  </div>
+  <div class='col'>
+    <img src=      'https://media2.giphy.com/media/830H0uF08yM5J29qjf/source.gif' />
+  </div>
+</div>
+
+
+<style>
+body {
+	background-color: #aafbaa;
+	 color: #3d3d3d;
+	 font-family: 'Open Sans', sans-serif;
+}
+
+ h1 {
+	 color: black;
+	 font-family: 'Montserrat', sans-serif;
+	 font-size: 3.6em;
+	 font-weight: lighter;
+	 margin: 40px auto;
+	 text-align: center;
+}
+ .containerr {
+	 
+	 display: flex;
+	 flex-direction: column;
+	 justify-content: center;
+}
+ .containerr .col {
+	 display: flex;
+	 flex-direction: column;
+	 justify-content: center;
+	 text-align: center;
+}
+ .containerr .col img {
+	 margin: -10px auto 0;
+	 width: 20vw;
+}
+ .containerr .col h4 {
+	 font-size: 1.5em;
+	 font-weight: lighter;
+	 padding: 10px;
+}
+ .containerr .col h5 {
+	 font-size: 1.3em;
+	 font-weight: lighter;
+	 padding: 10px;
+}
+ .containerr .col p {
+	 font-size: 0.9em;
+	 margin: 20px;
+}
+ .containerr .col p a {
+	 color: #8c8cb4;
+	 text-decoration: none;
+}
+ 
+</style>

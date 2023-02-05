@@ -6,6 +6,7 @@ using FreshFarmMarket.Models;
 using FreshFarmMarket.Services;
 using AspNetCore.ReCaptcha;
 using System.Web;
+using Microsoft.Extensions.Logging;
 
 namespace FreshFarmMarket.Pages
 {
@@ -20,10 +21,12 @@ namespace FreshFarmMarket.Pages
 
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly AuditLogService _auditlogService;
-        public LoginModel(SignInManager<ApplicationUser> signInManager, reCaptchaService reCaptchaService, ILogger<IndexModel> logger, AuditLogService auditlogService)
+        public readonly IEmailService _emailSender;
+        public LoginModel(SignInManager<ApplicationUser> signInManager, reCaptchaService reCaptchaService, ILogger<IndexModel> logger, AuditLogService auditlogService, IEmailService emailSender)
         {
             this.signInManager = signInManager;
             _reCaptchaService = reCaptchaService;
+            _emailSender = emailSender;
             _logger = logger;
             _auditlogService = auditlogService;
         }
@@ -32,6 +35,8 @@ namespace FreshFarmMarket.Pages
 
         [BindProperty]
         public string token { get; set; }
+        [BindProperty]
+        public string browser { get; set; }
 
         public void OnGet()
         {
@@ -55,6 +60,8 @@ namespace FreshFarmMarket.Pages
                 LModel.RememberMe, lockoutOnFailure: true);
                 if (identityResult.Succeeded)
                 {
+                    //_logger.LogWarning(HttpContext.Connection.RemoteIpAddress.ToString());
+                    _logger.LogWarning(browser);
                     AuditLog log = new();
                     log.userEmail = LModel.Email;
                     log.LogName = "User Logged in Successfully";

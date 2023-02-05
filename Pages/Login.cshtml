@@ -11,7 +11,7 @@
 			<h1 class="mb-3">Login </h1>
 
 			@{ if(@Model.message != null){
-                    <p style="color:red;">@Model.message</p>
+                            <p style="color:red;">@Model.message</p>
                 }
             }
 			
@@ -36,10 +36,14 @@
 				</div>
 
 				<input id="input-token" type="hidden" asp-for="token" />
+                <input id="input-broswer" type="hidden" asp-for="browser" />
 
 				<div class="mb-3">
 					<button type="submit" class="btn btn-primary">Login</button>
 				</div>
+                <div class="mb-3 form-group text-center">
+                    <a href="/ForgetPassword">Forgot Password</a>
+                </div>
 			</form>
 		</div>
 	</div>
@@ -53,5 +57,63 @@
                 console.log(token);
             });
         });
+		window.onload = function() {
+		  checkBrowser()
+		};
+
+		 function checkBrowser() {
+          
+            let userAgentString = 
+                navigator.userAgent;
+          
+            let chromeAgent = 
+                userAgentString.indexOf("Chrome") > -1;
+
+            let edgeAgent = 
+                userAgentString.indexOf("Edg") > -1;
+          
+            let IExplorerAgent = 
+                userAgentString.indexOf("MSIE") > -1 || 
+                userAgentString.indexOf("rv:") > -1;
+          
+            let firefoxAgent = 
+                userAgentString.indexOf("Firefox") > -1;
+          
+            let safariAgent = 
+                userAgentString.indexOf("Safari") > -1;
+                  
+            if ((chromeAgent) && (safariAgent)) 
+                safariAgent = false;
+
+            if ((chromeAgent) && (edgeAgent)) 
+                chromeAgent = false;
+          
+            let operaAgent = 
+                userAgentString.indexOf("OP") > -1;
+                      
+            if ((chromeAgent) && (operaAgent)) 
+                chromeAgent = false;
+
+            if(safariAgent == true)
+                $("#input-broswer").val("safari");
+            if(chromeAgent == true)
+                $("#input-broswer").val("chrome");
+            if(IExplorerAgent == true)
+                $("#input-broswer").val("IE");
+            if(operaAgent == true)
+                $("#input-broswer").val("opera");
+            if(firefoxAgent == true)
+                $("#input-broswer").val("firefox");
+            if(edgeAgent == true)
+                $("#input-broswer").val("edge");
+          
+            //console.log(safariAgent);
+            //console.log(chromeAgent);
+            //console.log(IExplorerAgent);
+            //console.log(operaAgent);
+            //console.log(firefoxAgent);
+        };
+
+		
 
 </script>
