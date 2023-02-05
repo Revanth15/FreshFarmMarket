@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using FreshFarmMarket.Models;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.DataProtection;
+using System.Web;
+using FreshFarmMarket.Services;
 
 namespace FreshFarmMarket.Pages
 {
@@ -15,11 +17,13 @@ namespace FreshFarmMarket.Pages
         private readonly ILogger<IndexModel> _logger;
         private UserManager<ApplicationUser> userManager { get; }
         private SignInManager<ApplicationUser> signInManager { get; }
+        private readonly AuditLogService _auditlogService;
 
-        public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,ILogger<IndexModel> logger)
+        public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,ILogger<IndexModel> logger, AuditLogService auditlogService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            _auditlogService = auditlogService;
             _logger = logger;
         }
 
@@ -46,20 +50,24 @@ namespace FreshFarmMarket.Pages
 
         public async Task<IActionResult> OnGetAsync()
         {
+            AuditLog log = new();
             var user = await userManager.GetUserAsync(User);
             var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
             var protector = dataProtectionProvider.CreateProtector("MySecretKey");
             if (user != null)
             {
-                fullName = user.fullName;
-                creditCardNo = protector.Unprotect(user.creditCardNo);
-                gender = user.gender;
-                email = user.NormalizedEmail.ToLower();
+                fullName = HttpUtility.HtmlEncode(user.fullName);
+                creditCardNo = HttpUtility.HtmlEncode(protector.Unprotect(user.creditCardNo));
+                gender = HttpUtility.HtmlEncode(user.gender);
+                email = HttpUtility.HtmlEncode(user.NormalizedEmail).ToLower();
                 mobileNo = user.mobileNo;
-                deliveryAddress = user.deliveryAddress;
-                aboutMe = user.aboutMe;
-                password = user.PasswordHash;
+                deliveryAddress = HttpUtility.HtmlEncode(user.deliveryAddress);
+                aboutMe = HttpUtility.HtmlEncode(user.aboutMe);
+                password = HttpUtility.HtmlEncode(user.PasswordHash);
                 ImageURL = user.imageURL ?? "/images/people/avatar-1.png";
+                log.userEmail = user.Email;
+                log.LogName = "User visited /Index";
+                _auditlogService.AddLog(log);
                 return Page();
             }
             else

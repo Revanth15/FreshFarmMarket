@@ -19,11 +19,13 @@ namespace FreshFarmMarket.Pages
         private readonly reCaptchaService _reCaptchaService;
 
         private readonly SignInManager<ApplicationUser> signInManager;
-        public LoginModel(SignInManager<ApplicationUser> signInManager, reCaptchaService reCaptchaService, ILogger<IndexModel> logger)
+        private readonly AuditLogService _auditlogService;
+        public LoginModel(SignInManager<ApplicationUser> signInManager, reCaptchaService reCaptchaService, ILogger<IndexModel> logger, AuditLogService auditlogService)
         {
             this.signInManager = signInManager;
             _reCaptchaService = reCaptchaService;
             _logger = logger;
+            _auditlogService = auditlogService;
         }
 
         public string message { get; set; }
@@ -53,10 +55,18 @@ namespace FreshFarmMarket.Pages
                 LModel.RememberMe, lockoutOnFailure: true);
                 if (identityResult.Succeeded)
                 {
+                    AuditLog log = new();
+                    log.userEmail = LModel.Email;
+                    log.LogName = "User Logged in Successfully";
+                    _auditlogService.AddLog(log);
                     return RedirectToPage("Index");
                 }
                 if (identityResult.IsLockedOut)
                 {
+                    AuditLog log = new();
+                    log.userEmail = LModel.Email;
+                    log.LogName = "User tried to log in but is Locked out";
+                    _auditlogService.AddLog(log);
                     message = "User account locked out!";
                 }
                 else

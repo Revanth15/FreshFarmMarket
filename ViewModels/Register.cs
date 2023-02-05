@@ -18,6 +18,7 @@ namespace FreshFarmMarket.ViewModels
         public string gender { get; set; }
 
         [Required]
+        [DataType(DataType.PhoneNumber)]
         public int mobileNo { get; set; }
 
         [Required]

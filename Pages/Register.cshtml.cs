@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using FreshFarmMarket.Models;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.DataProtection;
+using System.Web;
+using FreshFarmMarket.Services;
 
 namespace FreshFarmMarket.Pages
 {
@@ -12,19 +14,22 @@ namespace FreshFarmMarket.Pages
     {
         private UserManager<ApplicationUser> userManager { get; }
         private SignInManager<ApplicationUser> signInManager { get; }
+        private readonly AuditLogService _auditlogService;
         private IWebHostEnvironment _environment;
 
 
-        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment environment)
+        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment environment, AuditLogService auditlogService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             _environment = environment;
+            _auditlogService = auditlogService;
         }
 
         [BindProperty]
         public string fullName { get; set; }
         [BindProperty]
+        [CreditCard]
         public string creditCardNo { get; set; }
         [BindProperty]
         public string gender { get; set; }
@@ -81,32 +86,36 @@ namespace FreshFarmMarket.Pages
                     TempData["FlashMessage.Text"] = "Input required";
                 }
 
-                newUser.fullName = fullName;
-                newUser.email = email;
-                newUser.password = password;
-                newUser.confirmPassword = confirmPassword;
-                newUser.creditCardNo = creditCardNo;
-                newUser.gender = gender;
-                newUser.mobileNo = mobileNo;
-                newUser.deliveryAddress = deliveryAddress;
-                newUser.aboutMe = aboutMe;
+                //newUser.fullName = HttpUtility.HtmlEncode(fullName);
+                //newUser.email = HttpUtility.HtmlEncode(email);
+                newUser.password = HttpUtility.HtmlEncode(password);
+                //newUser.confirmPassword = HttpUtility.HtmlEncode(confirmPassword);
+                //newUser.creditCardNo = HttpUtility.HtmlEncode(creditCardNo);
+                //newUser.gender = HttpUtility.HtmlEncode(gender);
+                //newUser.mobileNo = mobileNo;
+                //newUser.deliveryAddress = HttpUtility.HtmlEncode(deliveryAddress);
+                //newUser.aboutMe = HttpUtility.HtmlEncode(aboutMe);
 
                 var user = new ApplicationUser()
                 {
-                    UserName = email,
-                    Email = email,
-                    fullName = fullName,
-                    creditCardNo = protector.Protect(creditCardNo),
-                    gender = gender,
+                    UserName = HttpUtility.HtmlEncode(email),
+                    Email = HttpUtility.HtmlEncode(email),
+                    fullName = HttpUtility.HtmlEncode(fullName),
+                    creditCardNo = protector.Protect(HttpUtility.HtmlEncode(creditCardNo)),
+                    gender = HttpUtility.HtmlEncode(gender),
                     mobileNo = mobileNo,
-                    deliveryAddress = deliveryAddress,
+                    deliveryAddress = HttpUtility.HtmlEncode(deliveryAddress),
                     imageURL = newUser.imageUrl,
-                    aboutMe = aboutMe
+                    aboutMe = HttpUtility.HtmlEncode(aboutMe)
                 };
                 var result = await userManager.CreateAsync(user, newUser.password);
                 if (result.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, false);
+                    
+                    AuditLog log = new();
+                    log.userEmail = HttpUtility.HtmlEncode(email);
+                    log.LogName = "User registered successfully";
+                    _auditlogService.AddLog(log);
                     return RedirectToPage("Index");
                 }
                 foreach (var error in result.Errors)
