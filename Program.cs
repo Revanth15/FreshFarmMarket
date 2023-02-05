@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FreshFarmMarket.Models;
-
+using Microsoft.AspNetCore.Authentication.Cookies;
+using FreshFarmMarket.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,21 +10,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AuthDbContext>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
-
+builder.Services.AddTransient<reCaptchaService>();
 builder.Services.ConfigureApplicationCookie(Config =>
 {
     Config.LoginPath = "/Login";
+    Config.LogoutPath = "/Logout";
+    Config.ExpireTimeSpan = TimeSpan.FromSeconds(60);
+    Config.SlidingExpiration = true;
 });
 
-builder.Services.AddDistributedMemoryCache();
+//builder.Services.AddDistributedMemoryCache();
 
-builder.Services.AddSession(options =>
-{
-    options.Cookie.Name = ".FreshFarmMarket.Session";
-    options.IdleTimeout = TimeSpan.FromSeconds(10);
-    options.Cookie.Expiration = TimeSpan.FromSeconds(10);
-    options.Cookie.IsEssential = true;
-});
+//builder.Services.AddSession(options =>
+//{
+//    options.Cookie.Name = ".FreshFarmMarket.Session";
+//    options.IdleTimeout = TimeSpan.FromSeconds(10);
+//    options.Cookie.Expiration = TimeSpan.FromSeconds(10);
+//    options.Cookie.IsEssential = true;
+//});
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -61,7 +65,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 
-app.UseSession();
+//app.UseSession();
 
 app.UseAuthorization();
 

@@ -35,6 +35,8 @@
 					<label class="form-check-label" asp-for="LModel.RememberMe">Remember Me?</label>
 				</div>
 
+				<input id="input-token" type="hidden" asp-for="token" />
+
 				<div class="mb-3">
 					<button type="submit" class="btn btn-primary">Login</button>
 				</div>
@@ -42,3 +44,14 @@
 		</div>
 	</div>
 </div>
+
+<script src="https://www.google.com/recaptcha/api.js?render=6LcW-lEkAAAAAMlqaps716ZwjsiBLdU0KyiwwJnB"></script>
+<script>
+        grecaptcha.ready(function () {
+            grecaptcha.execute('6LcW-lEkAAAAAMlqaps716ZwjsiBLdU0KyiwwJnB', { action: 'submit' }).then(function (token) {
+				$("#input-token").val(token);
+                console.log(token);
+            });
+        });
+
+</script>
