@@ -25,6 +25,14 @@ builder.Services.ConfigureApplicationCookie(Config =>
     Config.SlidingExpiration = true;
 });
 
+var configuration = builder.Configuration;
+
+builder.Services.AddAuthentication().AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = configuration["Google:ClientId"];
+    googleOptions.ClientSecret = configuration["Google:SecretID"];
+});
+
 builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
 {
     options.Cookie.Name = "MyCookieAuth";

@@ -3,7 +3,7 @@ namespace FreshFarmMarket.Services
 {
     public class reCaptchaService
     {
-        public virtual async Task<reCaptchaRespo> tokenVerify(string token)
+        public virtual async Task<reCaptchaResponse> tokenVerify(string token)
         {
             reCaptchaData data = new reCaptchaData
             {
@@ -13,7 +13,7 @@ namespace FreshFarmMarket.Services
 
             HttpClient client = new HttpClient();
             var response = await client.GetStringAsync($"https://www.google.com/recaptcha/api/siteverify?secret={data.secret}&response={data.response}");
-            var reCaptcharesponse = JsonConvert.DeserializeObject<reCaptchaRespo>(response);
+            var reCaptcharesponse = JsonConvert.DeserializeObject<reCaptchaResponse>(response);
             return reCaptcharesponse;
         }
     }
@@ -22,7 +22,7 @@ namespace FreshFarmMarket.Services
         public string response { get; set; }
         public string secret { get; set; }
     }
-    public class reCaptchaRespo
+    public class reCaptchaResponse
     {
         public bool success { get; set; }
         public DateTime challenge_ts { get; set; }
