@@ -10,7 +10,7 @@ using FreshFarmMarket.Services;
 
 namespace FreshFarmMarket.Pages
 {
-    public class RegisterModel : PageModel
+    public class GGLRegisterModel : PageModel
     {
         private UserManager<ApplicationUser> userManager { get; }
         private SignInManager<ApplicationUser> signInManager { get; }
@@ -19,7 +19,7 @@ namespace FreshFarmMarket.Pages
         private IWebHostEnvironment _environment;
         private readonly PreviousPasswordsService _previousPasswordsService;
 
-        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment environment, AuditLogService auditlogService, PreviousPasswordsService previousPasswordsService, RoleManager<IdentityRole> roleManager)
+        public GGLRegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IWebHostEnvironment environment, AuditLogService auditlogService, PreviousPasswordsService previousPasswordsService, RoleManager<IdentityRole> roleManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -46,59 +46,25 @@ namespace FreshFarmMarket.Pages
         [BindProperty]
         [DataType(DataType.EmailAddress)]
         public string email { get; set; }
-        [BindProperty]
-        public string password { get; set; }
-        [BindProperty]
-        [Compare(nameof(password), ErrorMessage = "Password and confirmation password does not match")]
-        public string confirmPassword { get; set; }
 
-        [BindProperty]
-        public IFormFile? Upload { get; set; }
+        public string? imageUrl { get; set; }
 
-        public void OnGet()
+
+        public void OnGet(string Email, string name,string pfp)
         {
+            fullName = name;
+            email = Email;
+            imageUrl = pfp;
+
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            Register newUser = new();
             if (ModelState.IsValid)
             {
                 var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
                 var protector = dataProtectionProvider.CreateProtector("MySecretKey");
-                if (Upload != null)
-                {
-                    if (Upload.Length > 2 * 1024 * 1024)
-                    {
-                        ModelState.AddModelError("Upload",
-                        "File size cannot exceed 2MB.");
-                        return Page();
-                    }
-                    var uploadsFolder = "uploads/userUploads";
-                    var imageFile = Guid.NewGuid() + Path.GetExtension(
-                    Upload.FileName);
-                    var imagePath = Path.Combine(_environment.ContentRootPath,
-                    "wwwroot", uploadsFolder, imageFile);
-                    using var fileStream = new FileStream(imagePath, FileMode.Create);
-                    await Upload.CopyToAsync(fileStream);
-                    newUser.imageUrl = string.Format("/{0}/{1}", uploadsFolder, imageFile);
-                }
-                else
-                {
-                    TempData["FlashMessage.Type"] = "danger";
-                    TempData["FlashMessage.Text"] = "Input required";
-                }
-
-                //newUser.fullName = HttpUtility.HtmlEncode(fullName);
-                //newUser.email = HttpUtility.HtmlEncode(email);
-                newUser.password = HttpUtility.HtmlEncode(password);
-                //newUser.confirmPassword = HttpUtility.HtmlEncode(confirmPassword);
-                //newUser.creditCardNo = HttpUtility.HtmlEncode(creditCardNo);
-                //newUser.gender = HttpUtility.HtmlEncode(gender);
-                //newUser.mobileNo = mobileNo;
-                //newUser.deliveryAddress = HttpUtility.HtmlEncode(deliveryAddress);
-                //newUser.aboutMe = HttpUtility.HtmlEncode(aboutMe);
-
+                
                 var user = new ApplicationUser()
                 {
                     UserName = HttpUtility.HtmlEncode(email),
@@ -108,15 +74,13 @@ namespace FreshFarmMarket.Pages
                     gender = HttpUtility.HtmlEncode(gender),
                     mobileNo = mobileNo,
                     deliveryAddress = HttpUtility.HtmlEncode(deliveryAddress),
-                    imageURL = newUser.imageUrl,
+                    imageURL = imageUrl,
                     aboutMe = HttpUtility.HtmlEncode(aboutMe),
-                    lastPasswordChangeDate = DateTime.Now,
-                    TwoFactorEnabled = true,
-                    EmailConfirmed = true
+                    lastPasswordChangeDate = DateTime.Now
                 };
 
                 IdentityRole role = await roleManager.FindByIdAsync("Admin");
-                if(role == null)
+                if (role == null)
                 {
                     IdentityResult Iresult = await roleManager.CreateAsync(new IdentityRole("Admin"));
                     if (!Iresult.Succeeded)
@@ -125,16 +89,12 @@ namespace FreshFarmMarket.Pages
                     }
                 }
 
-                var result = await userManager.CreateAsync(user, newUser.password);
-                PreviousPasswords hash = new();
-                hash.userId = user.Id;
-                hash.passwordHash = user.PasswordHash;
-                _previousPasswordsService.AddHash(hash);
+                var result = await userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     AuditLog log = new();
                     log.userEmail = HttpUtility.HtmlEncode(email);
-                    log.LogName = "User registered successfully";
+                    log.LogName = "User registered successfully through Google";
                     _auditlogService.AddLog(log);
                     return RedirectToPage("Index");
                 }

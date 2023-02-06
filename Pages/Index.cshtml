@@ -33,10 +33,17 @@
                 <p>@Model.email</p>
             </div>
 
-            <div class="col-12">
-                <label class="form-label">Password Hash:</label>
-                <p>@Model.password</p>
-            </div>
+            @{ if(@Model.password != null){
+                <div class="col-12">
+                    <label class="form-label">Password Hash:</label>
+                    <p>@Model.password</p>
+                </div>
+                }else
+                {
+                    <label class="form-label">Password Hash:</label>
+                    <p>No password as you logged in with your google account</p>
+                }
+            }
 
             <div class="col-6 mb-3">
                 <label class="form-label">Mobile Number:</label>

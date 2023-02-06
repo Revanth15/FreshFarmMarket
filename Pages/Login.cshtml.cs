@@ -7,6 +7,8 @@ using FreshFarmMarket.Services;
 using AspNetCore.ReCaptcha;
 using System.Web;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace FreshFarmMarket.Pages
 {
@@ -48,6 +50,7 @@ namespace FreshFarmMarket.Pages
         {
             if (ModelState.IsValid)
             {
+                _logger.LogWarning(token.ToString());
                 var reCaptcharesult = _reCaptchaService.tokenVerify(token);
                 //_logger.LogWarning(reCaptcharesult.Result.score.ToString());
                 //_logger.LogWarning(reCaptcharesult.Result.success.ToString());
@@ -58,38 +61,55 @@ namespace FreshFarmMarket.Pages
                     message = "You are not a human!";
                     return Page();
                 }
+                _logger.LogWarning(reCaptcharesult.Result.score.ToString());
                 var user = await userManager.FindByNameAsync(LModel.Email);
 
-                var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
-                LModel.RememberMe, lockoutOnFailure: true);
-                if (identityResult.Succeeded)
+                //var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
+                //LModel.RememberMe, lockoutOnFailure: true);
+                if (user != null && await userManager.CheckPasswordAsync(user, LModel.Password))
                 {
-                    if (user.lastPasswordChangeDate.AddMinutes(30) < DateTime.Now)
+                    var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
+                    LModel.RememberMe, lockoutOnFailure: true);
+                    _logger.LogWarning(identityResult.RequiresTwoFactor.ToString());
+                    if (identityResult.RequiresTwoFactor)
                     {
-                        _logger.LogWarning("failed");
-                        return Redirect("/changepassword");
+                        var Token = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+                        _logger.LogWarning(Token);
+                        var res = _emailSender.SendEmail(
+                            user.Email,
+                             "OTP",
+                            $"One-Time Password {Token}",
+                            null,null);
+                        return RedirectToPage("/LoginOTPAuth", new { email = LModel.Email });
                     }
-                    _logger.LogWarning(user.lastPasswordChangeDate.AddMinutes(30).ToString());
-                    _logger.LogWarning(DateTime.Now.ToString());
-                    //_logger.LogWarning(HttpContext.Connection.RemoteIpAddress.ToString());
-                    _logger.LogWarning(browser);
-                    AuditLog log = new();
-                    log.userEmail = LModel.Email;
-                    log.LogName = "User Logged in Successfully";
-                    _auditlogService.AddLog(log);
-                    return RedirectToPage("Index");
-                }
-                if (identityResult.IsLockedOut)
-                {
-                    AuditLog log = new();
-                    log.userEmail = LModel.Email;
-                    log.LogName = "User tried to log in but is Locked out";
-                    _auditlogService.AddLog(log);
-                    message = "User account locked out!";
+                    if (identityResult.Succeeded)
+                    {
+                        //await userManager.UpdateSecurityStampAsync(user);
+                        if (user.lastPasswordChangeDate.AddMinutes(180) < DateTime.Now)
+                        {
+                            _logger.LogWarning("User redirected to change password");
+                            return Redirect("/changepassword");
+                        }
+                        _logger.LogWarning(browser);
+                        AuditLog log = new();
+                        log.userEmail = LModel.Email;
+                        log.LogName = "User Logged in Successfully";
+                        _auditlogService.AddLog(log);
+                        return RedirectToPage("Index");
+                    }
+                    if (identityResult.IsLockedOut)
+                    {
+                        AuditLog log = new();
+                        log.userEmail = LModel.Email;
+                        log.LogName = "User tried to log in but is Locked out";
+                        _auditlogService.AddLog(log);
+                        message = "User account locked out!";
+                    }
                 }
                 else
                 {
-                    message = "Username or Password incorrect!";
+                    ModelState.AddModelError("", "Username or Password incorrect!");
+                    //message = "Username or Password incorrect!";
                 }
             }
             return Page();

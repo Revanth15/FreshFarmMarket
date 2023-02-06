@@ -17,12 +17,19 @@ builder.Services.AddTransient<reCaptchaService>();
 builder.Services.AddScoped<AuditLogService>();
 builder.Services.AddScoped<PreviousPasswordsService>();
 builder.Services.AddAntiforgery(options => options.HeaderName = "XSRF-TOKEN");
+builder.Services.AddControllersWithViews();
 builder.Services.ConfigureApplicationCookie(Config =>
 {
     Config.LoginPath = "/Login";
     Config.LogoutPath = "/Logout";
     Config.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     Config.SlidingExpiration = true;
+    Config.AccessDeniedPath = "/error/401";
+});
+
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.Zero;
 });
 
 var configuration = builder.Configuration;
@@ -36,6 +43,11 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
 {
     options.Cookie.Name = "MyCookieAuth";
+});
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(1);
 });
 
 var emailConfig = builder.Configuration
@@ -81,14 +93,14 @@ builder.Services.Configure<IdentityOptions>(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseExceptionHandler("/Error");
+//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+//    app.UseHsts();
+//}
 
-app.UseStatusCodePagesWithRedirects("/error/{0}");
+//app.UseStatusCodePagesWithRedirects("/error/{0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -99,6 +111,13 @@ app.UseAuthentication();
 //app.UseSession();
 
 app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
 
 var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
 

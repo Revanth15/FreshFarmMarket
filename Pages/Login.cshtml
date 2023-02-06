@@ -11,12 +11,14 @@
 			<h1 class="mb-3">Login </h1>
 
 			@{ if(@Model.message != null){
-                            <p style="color:red;">@Model.message</p>
+                    <p style="color:red;">@Model.message</p>
                 }
             }
+
 			
 
 			<form method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
 				
 				<div class="mb-3">
 					<label class="form-label" asp-for="LModel.Email">Email Address</label>
@@ -44,10 +46,10 @@
                 <div class="mb-3 form-group text-center">
                     <a href="/ForgetPassword">Forgot Password</a>
                 </div>
-                <div class="mb-3 form-group text-center">
-                    <a href="/">Login with your google account</a>
-                </div>
 			</form>
+            <div class="mb-3 form-group text-center">
+                <button class="btn"><a asp-controller="Account" asp-action="GoogleLogin">Login with your google account</a></button>
+            </div>
 		</div>
 	</div>
 </div>
@@ -97,6 +99,7 @@
             if ((chromeAgent) && (operaAgent)) 
                 chromeAgent = false;
 
+            console.log($("#input-broswer"))
             if(safariAgent == true)
                 $("#input-broswer").val("safari");
             if(chromeAgent == true)
@@ -116,7 +119,11 @@
             //console.log(operaAgent);
             //console.log(firefoxAgent);
         };
-
-		
-
 </script>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

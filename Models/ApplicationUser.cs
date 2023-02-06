@@ -11,7 +11,7 @@ namespace FreshFarmMarket.Models
 		public string gender { get; set; }
 		public int mobileNo { get; set; }
 		public string deliveryAddress { get; set; }
-		public string imageURL { get; set; }
+		public string? imageURL { get; set; }
 		public string aboutMe { get; set; }
 		public DateTime lastPasswordChangeDate { get; set; }
 	}
