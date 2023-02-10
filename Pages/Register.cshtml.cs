@@ -132,6 +132,7 @@ namespace FreshFarmMarket.Pages
                 _previousPasswordsService.AddHash(hash);
                 if (result.Succeeded)
                 {
+                    //result = await userManager.AddToRoleAsync(user, "Admin");
                     AuditLog log = new();
                     log.userEmail = HttpUtility.HtmlEncode(email);
                     log.LogName = "User registered successfully";

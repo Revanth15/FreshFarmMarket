@@ -19,10 +19,6 @@ namespace FreshFarmMarket.Controllers
         }
         public IActionResult GoogleLogin(string returnUrl = null)
         {
-            //await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties()
-            //{
-            //    RedirectUri = Url.Action("GoogleCallback", "Account", new { returnUrl })
-            //});
             var redirectUrl = Url.Action(nameof(GoogleCallback), "Account", new { returnUrl });
             var properties = signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
             return Challenge(properties, "Google");
@@ -40,14 +36,11 @@ namespace FreshFarmMarket.Controllers
                 return Redirect("/Register");
             }
 
-            // Obtain the user information
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
             var name = info.Principal.FindFirstValue(ClaimTypes.Name);
             var pfp = info.Principal.FindFirstValue("image");
 
-            // Use the user information for your application logic
 
-            // Redirect to the original URL
             var user = await userManager.FindByEmailAsync(email);
             if (user == null)
             {

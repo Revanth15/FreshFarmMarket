@@ -66,10 +66,10 @@ namespace FreshFarmMarket.Pages
 
                 //var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
                 //LModel.RememberMe, lockoutOnFailure: true);
-                if (user != null && await userManager.CheckPasswordAsync(user, LModel.Password))
+                if(userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, LModel.Password).ToString().Equals("Success"))
                 {
                     var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
-                    LModel.RememberMe, lockoutOnFailure: true);
+                        LModel.RememberMe, lockoutOnFailure: true);
                     _logger.LogWarning(identityResult.RequiresTwoFactor.ToString());
                     if (identityResult.RequiresTwoFactor)
                     {
@@ -77,14 +77,13 @@ namespace FreshFarmMarket.Pages
                         _logger.LogWarning(Token);
                         var res = _emailSender.SendEmail(
                             user.Email,
-                             "OTP",
+                                "OTP",
                             $"One-Time Password {Token}",
                             null,null);
                         return RedirectToPage("/LoginOTPAuth", new { email = LModel.Email });
                     }
                     if (identityResult.Succeeded)
                     {
-                        //await userManager.UpdateSecurityStampAsync(user);
                         if (user.lastPasswordChangeDate.AddMinutes(180) < DateTime.Now)
                         {
                             _logger.LogWarning("User redirected to change password");

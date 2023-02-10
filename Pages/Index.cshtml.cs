@@ -62,7 +62,7 @@ namespace FreshFarmMarket.Pages
                 email = HttpUtility.HtmlEncode(user.NormalizedEmail).ToLower();
                 mobileNo = user.mobileNo;
                 deliveryAddress = HttpUtility.HtmlEncode(user.deliveryAddress);
-                aboutMe = HttpUtility.HtmlEncode(user.aboutMe);
+                aboutMe = HttpUtility.HtmlDecode(user.aboutMe);
                 password = HttpUtility.HtmlEncode(user.PasswordHash);
                 ImageURL = user.imageURL ?? "/images/people/avatar-1.png";
                 log.userEmail = user.Email;

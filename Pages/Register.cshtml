@@ -69,13 +69,13 @@
 
 				<div class="mb-3">
 					<label class="form-label" asp-for="password">Password</label>
-					<input id="pass" type="Text" asp-for="password" class="form-control" required/>
+					<input id="pass" type="password " asp-for="password" class="form-control" required/>
 					<span asp-validaton-for="password" class="text-danger"></span>
 				</div>
 
 				<div class="mb-3">
 					<label class="form-label" asp-for="confirmPassword">Confirm Password</label>
-					<input id="pass2" type="Text" asp-for="confirmPassword" class="form-control" required/>
+					<input id="pass2" type="password" asp-for="confirmPassword" class="form-control" required/>
 					<span asp-validaton-for="confirmPassword" class="text-danger"></span>
 				</div>
 
@@ -112,7 +112,7 @@
 		button.disabled = true;
 
 		$("#pass").on("input", function() {
-		  var bool = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{12,}$/.test($("#pass").val())
+		  var bool = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@@$%^&*-]).{12,}$/.test($("#pass").val())
 		  if(bool == true){
 			  $("#passval").text("Password meets requirement!")
 			  $("#passval").css("color", "green")

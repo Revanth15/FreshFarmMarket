@@ -32,6 +32,7 @@ namespace FreshFarmMarket.Pages
 			Console.WriteLine(test.Succeeded);
 			if (test.Succeeded)
 			{
+				await userManager.UpdateSecurityStampAsync(user);
 				await signInManager.SignInAsync(user, false);
 				if (user.lastPasswordChangeDate.AddMinutes(180) < DateTime.Now)
 				{
